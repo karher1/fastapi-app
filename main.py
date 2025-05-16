@@ -84,8 +84,8 @@ def partial_update_application(candidate_id: str, update: PartialUpdateApplicati
                 update_data.append("job_id")
             if not update_data:
                 return {"message": "There were not fields updated"}
-            return {"message": f"Application for {candidate_id} successfully updated with {update_data}"}
-    return {"error": f"Application not found for candidate ID: {','.join(update_data)}"} #.join for a clean message
+            return {"message": f"Application for {candidate_id} successfully updated with {','.join(update_data)}"}
+    return {"error": f"Application not found for candidate ID: {candidate_id}"} 
 
 #delete an application using candidate id
 @app.delete("/applications/{candidate_id}")
