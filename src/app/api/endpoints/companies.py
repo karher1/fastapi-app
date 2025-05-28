@@ -23,7 +23,7 @@ def read_companies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
 
 @router.get("/{company_id}", response_model=schemas.Company)
 def read_company(company_id: int, db: Session = Depends(get_db)):
-    db_company = db.query(models.Company).filter(models.Company.id == company_id).firsts()
+    db_company = db.query(models.Company).filter(models.Company.id == company_id).first()
     if db_company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     return db_company
@@ -48,7 +48,7 @@ def delete_company(company_id: int, db: Session = Depends(get_db)):
     if db_company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     
-    db.delte(db_company)
+    db.delete(db_company)
     db.commit()
     return {"messgae": 'Company deleted successfully'}
 
