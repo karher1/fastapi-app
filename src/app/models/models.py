@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
 
 from app.db.session import Base
@@ -29,6 +29,7 @@ class JobPosting(Base):
     location_type = Column(String)
     employment_type = Column(String)
     description = Column(Text, nullable=True)
+    required_tools = Column(JSON, nullable=True)
     
     company = relationship("Company", back_populates="job_postings")
     

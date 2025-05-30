@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, Field
 from typing import Optional, List
 
 #Company Schemas
@@ -26,12 +26,13 @@ class Company(CompanyBase):
 
 #Job Posting Schemas
 class JobPostingBase(BaseModel):
-    title: str
-    company_id: int
-    compensation_min: Optional[float] = None
-    compensation_max: Optional[float] = None
-    location_type: Optional[str] = None
-    employment_type: Optional[str] = None
+    title: str = Field(description="The title of the job posting")
+    company_id: int = Field(description="The id of the company that is posting the job")
+    compensation_min: Optional[float] = Field(default=None, description="The minimum compensation for the job")
+    compensation_max: Optional[float] = Field(default=None, description="The maximum compensation for the job")
+    location_type: Optional[str] = Field(default=None, description="The location type of the job")
+    employment_type: Optional[str] = Field(default=None, description="The employment type of the job")
+    description: Optional[str] = Field(default=None, description="The description of the job")
 
 class JobPostingCreate(JobPostingBase):
     pass
@@ -47,4 +48,5 @@ class JobPosting(JobPostingBase):
         from_attributes = True
 
 class JobDescription(BaseModel):
-    required_tools: List[str]
+    required_tools: List[str] = Field(default=None,description="List of tools the company is requiring for the job")
+    company_culture: List[str] = Field(default=None,description="List of company culture values")
