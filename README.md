@@ -1,36 +1,27 @@
-Python Project
-This is a Python project template with a basic structure.
+# AI-Enhanced Job Description Generator (FastAPI + LangChain)
 
-Setup
-Create a virtual environment (recommended):
+This project is a FastAPI backend that allows companies to create structured job postings and generate detailed AI-enhanced job descriptions using OpenAI and LangChain.
+
+---
+
+## 🚀 Features
+
+- Create and manage companies and job postings
+- Generate job descriptions with OpenAI
+- Uses structured output via Pydantic schemas
+- JSON-based API using FastAPI
+- SQLAlchemy + Alembic for ORM and migrations
+
+---
+
+## 📦 Setup
+
+```bash // zsh
+# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # On Unix/macOS
 # or
-.\venv\Scripts\activate  # On Windows
-Install dependencies:
+.\venv\Scripts\activate   # On Windows
+
+# Install dependencies
 pip install -r requirements.txt
-Usage
-Run the main script:
-
-python src/main.py
-Development
-This project includes several development tools:
-
-pytest for testing
-black for code formatting
-flake8 for code linting
-To format your code:
-
-black .
-To run linting:
-
-flake8
-To run tests (once implemented):
-
-pytest
-Project Structure
-.
-├── README.md
-├── requirements.txt
-└── src/
-    └── main.py

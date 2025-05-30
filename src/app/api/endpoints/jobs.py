@@ -5,6 +5,7 @@ from fastapi.responses import StreamingResponse
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
 from datetime import datetime
 
 from app.db.session import get_db
@@ -83,37 +84,39 @@ def generate_job_description(job_id: int, request: schemas.JobDescription, db: S
     db_job = db.query(models.JobPosting).filter(models.JobPosting.id == job_id).first()
     if db_job is None:
         raise HTTPException(status_code=404, detail= "Job posting not found")
-    
-    # 2. Optional JSON data for required tools and company culture
-    tools_required = (", ").join(request.required_tools)
-    company_culture = (", ").join(request.company_culture)
-    
-    # 3. Create the prompt
-    
+    #2. get the company
+    db_company = db.query(models.Company).filter(models.Company.id== db_job.company_id).first()
+    if db_company is None:
+        raise HTTPException(status_code=404, detail="Company not found")
+        
+    # 3. Create the prompt    
     messages = ChatPromptTemplate.from_messages([
-        SystemMessage(content="You are a helpful assistant that generates professional job descriptions for job postings."),
-        HumanMessage(content=f"""Write a professional job description for the following job:
+        SystemMessage(content="You are a helpful assistant that generates professional job descriptions for job postings in JSON Format."),
+        HumanMessage(content=f"""
+                    Given the following job information, generate a structured JSON response with the following keys:
+                    - "about_company": A paragraph describing the company
+                    - "key_responsibilities": A bullet-point list of responsibilities
+                    - "required_qualifications": A bullet-point list of required qualifications
+                    - "preferred_qualifications": (Optional) A bullet-point list of preferred qualifications
+                    Respond with only JSON. Do not include any markdown or extra explanation.
                     Job Title: {db_job.title}
                     Company: {db_job.company.name}
-                    Required tools: {tools_required}
-                    Respond in structured plain text, without using markdown or # symbols for headers. Include:
-                    1. About the Company a compellling section, with the company culture if provided: {company_culture}
-                    2. Key Responsibilities
-                    3. Required Qualifications
-                    4. Optional: Preferred qualifications
-                    Use professional language and make it engaging and interesting
+                    Required tools: {','.join(request.required_tools)}
+                    Company Culture: {','.join(request.company_culture)}
+                    
                      """)
     ])
 
-    # 4. format the response
-    formatted_messages = messages.format_messages(
-        job_title = db_job.title,
-        company=db_job.company.name,
-        tools_required=tools_required,
-    )
+    formatted_messages = messages.format_messages()
     # 5. call the model
     model = init_chat_model("gpt-4o-mini", model_provider="openai", temperature=0, max_tokens=300)
-    response = model.invoke(formatted_messages)
+    parser = PydanticOutputParser(pydantic_object=schemas.JobDescriptionResponse)
+
+    try:
+        response = model.invoke(formatted_messages)
+        stuctured = parser.parse(response.content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating job description: {str(e)}")
 
     # 6. Save the job description to the database
     db_job.description = response.content
